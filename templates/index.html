@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget & Expense Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💰%3C/text%3E%3C/svg%3E">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Loading screen -->
+        <div id="loadingScreen" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+            <div style="text-align: center;">
+                <h2 data-i18n="loading">Loading Budget Tracker...</h2>
+                <p data-i18n="please_wait">Please wait while we verify your session.</p>
+            </div>
+        </div>
+
+        <div class="app-container">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <!-- Navigation removed -->
+                    </div>
+                    <div class="header-center">
+                        <div class="app-logo">
+                            <div class="logo-icon">💰</div>
+                            <div class="logo-text">
+                                <h1 data-i18n="app_name">BudgetTracker</h1>
+                                <p data-i18n="app_tagline">Smart Finance Manager</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <button id="menuToggle" class="menu-trigger">
+                            <div class="user-chip">
+                                <div class="user-avatar" id="userAvatar">U</div>
+                                <span id="usernameDisplay"></span>
+                            </div>
+                            <div class="hamburger-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Mobile Menu -->
+            <div id="menuOverlay" class="menu-overlay"></div>
+            <div id="mobileMenu" class="mobile-menu">
+                <div class="menu-header">
+                    <div class="menu-profile">
+                        <div class="user-avatar big" id="menuUserAvatar">U</div>
+                        <div class="user-info">
+                            <span class="user-name" id="menuUsername">dhanvanth</span>
+                            <span class="user-status" data-i18n="online">Active Now</span>
+                        </div>
+                    </div>
+                    <button class="menu-close" id="menuClose">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="menu-content" style="padding: 24px 16px; display: flex; flex-direction: column; gap: 20px;">
+                    <div class="menu-item-group">
+                        <label for="languageSwitch" class="form-label" style="font-size: 0.8rem; color: #8892a4; margin-bottom: 8px; display: block;">Language / மொழி</label>
+                        <select id="languageSwitch" class="language-select" style="width: 100%; background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 8px; font-size: 1rem;">
+                            <option value="en" style="color: #000;">English</option>
+                            <option value="ta" style="color: #000;">தமிழ்</option>
+                        </select>
+                    </div>
+                    
+                    <button class="menu-logout-btn" id="mobileLogoutBtn" style="margin-top: auto;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span data-i18n="logout">Logout</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="app-main">
+
+                <!-- ═══ DASHBOARD: Track List ═══ -->
+                <div id="dashboard" class="view active">
+                    <div class="view-header">
+                        <h2 data-i18n="your_tracks">Your Tracks</h2>
+                        <p>Create and manage budget tracks</p>
+                    </div>
+
+                    <!-- Create Track Form Widget -->
+                    <div class="form-container create-track-form">
+                        <div class="form-header" style="margin-bottom: 20px; text-align: left;">
+                            <h3 style="margin-bottom: 4px; font-size: 1.2rem; color: #fff;">✨ Start a New Budget</h3>
+                            <p style="color: #a0aec0; font-size: 0.85rem; margin: 0;">Name your budget and set an optional limit to track your spending effortlessly.</p>
+                        </div>
+                        <form id="createTrackForm" class="modern-form track-grid-form">
+                            <div class="form-group track-name-group">
+                                <label for="newTrackName" class="form-label">Track Name</label>
+                                <div class="input-with-icon" style="position: relative;">
+                                    <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: 0.6;">🏷️</span>
+                                    <input type="text" id="newTrackName" class="form-input" style="padding-left: 40px;" placeholder="e.g. Groceries, Rent, Vacation..." required>
+                                </div>
+                            </div>
+                            <div class="form-group track-budget-group">
+                                <label for="newTrackBudget" class="form-label">Budget Limit (₹)</label>
+                                <div class="input-with-icon" style="position: relative;">
+                                    <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: 0.6;">🏦</span>
+                                    <input type="number" id="newTrackBudget" class="form-input" style="padding-left: 40px;" placeholder="0 = no limit" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="form-group track-submit-group">
+                                <button type="submit" class="submit-btn" style="width: 100%; height: 48px; background: linear-gradient(90deg, #00f2fe, #4facfe); border: none; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(0, 242, 254, 0.4);">
+                                    <div class="btn-content">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <span style="color: #000;">Create Track</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Track Cards Grid -->
+                    <div id="tracksGrid" class="tracks-grid">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- ═══ TRACK DETAIL VIEW ═══ -->
+                <div id="track-detail" class="view">
+                    <!-- Back button -->
+                    <div class="track-detail-header">
+                        <button id="backToTracks" class="back-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            </svg>
+                            <span>Back</span>
+                        </button>
+                        <div class="track-title-area">
+                            <h2 id="trackDetailName">Track Name</h2>
+                            <div class="track-actions-top">
+                                <button id="editTrackBtn" class="icon-btn" title="Edit Track">✏️</button>
+                                <button id="deleteTrackBtn" class="icon-btn danger" title="Delete Track">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compact Stats Strip -->
+                    <div class="stats-strip">
+                        <div class="stat-chip available">
+                            <span class="chip-label">Available</span>
+                            <span class="chip-value" id="trackAvailable">₹0</span>
+                        </div>
+                        <div class="stat-chip spent">
+                            <span class="chip-label">Spent</span>
+                            <span class="chip-value" id="trackSpent">₹0</span>
+                        </div>
+                        <div class="stat-chip remaining">
+                            <span class="chip-label">Remaining</span>
+                            <span class="chip-value" id="trackRemaining">₹0</span>
+                        </div>
+                    </div>
+
+                    <!-- Slim Progress -->
+                    <div class="slim-progress">
+                        <div class="slim-progress-bar">
+                            <div class="slim-progress-fill" id="trackProgress"></div>
+                        </div>
+                        <span class="slim-progress-text" id="trackProgressText">0%</span>
+                    </div>
+
+                    <!-- Mobile Tab Switcher Removed -->
+
+                    <!-- Income & Expense Side-by-Side -->
+                    <div class="track-columns">
+                        <!-- Expense Section (Left) -->
+                        <section class="track-section track-col-expense">
+                            <div class="section-header">
+                                <h3>💸 Expenses</h3>
+                                <button class="toggle-form-btn" id="toggleExpenseForm">+ Add Expense</button>
+                            </div>
+                            <div id="expenseFormWrapper" class="collapsible-form" style="display:none;">
+                                <div class="form-container">
+                                    <form id="expenseForm" class="modern-form">
+                                        <div class="form-group">
+                                            <label for="expenseAmount" class="form-label">Amount</label>
+                                            <div class="amount-container">
+                                                <div class="currency-symbol">₹</div>
+                                                <input type="number" id="expenseAmount" name="amount" class="form-input amount-input" step="0.01" min="0" placeholder="0.00" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="expenseCategory" class="form-label">Category</label>
+                                            <div class="select-container">
+                                                <select id="expenseCategory" name="category" class="form-select" required>
+                                                    <option value="">Select Category</option>
+                                                    <option value="food">🍔 Food & Dining</option>
+                                                    <option value="transportation">🚗 Transportation</option>
+                                                    <option value="shopping">🛍️ Shopping</option>
+                                                    <option value="entertainment">🎬 Entertainment</option>
+                                                    <option value="utilities">⚡ Utilities</option>
+                                                    <option value="healthcare">🏥 Healthcare</option>
+                                                    <option value="education">📚 Education</option>
+                                                    <option value="travel">✈️ Travel</option>
+                                                    <option value="lend">💸 Lend</option>
+                                                    <option value="other">📦 Other</option>
+                                                </select>
+                                                <div class="select-arrow">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="expenseDate" class="form-label">Date</label>
+                                            <input type="date" id="expenseDate" name="date" class="form-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="expenseDescription" class="form-label">Description</label>
+                                            <input type="text" id="expenseDescription" name="description" class="form-input" placeholder="What did you spend on?" required>
+                                        </div>
+                                        <div class="form-group multi-track-selection">
+                                            <label class="form-label">Also add to other tracks?</label>
+                                            <div id="expenseMultiTracks" class="track-checklist">
+                                                <!-- Populated by JS -->
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="submit-btn">
+                                            <div class="btn-content">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                <span>Add Expense</span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="expenseList" class="items-list">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </section>
+
+                        <!-- Income Section (Right) -->
+                        <section class="track-section track-col-income">
+                            <div class="section-header">
+                                <h3>💰 Income</h3>
+                                <button class="toggle-form-btn" id="toggleIncomeForm">+ Add Income</button>
+                            </div>
+                            <div id="incomeFormWrapper" class="collapsible-form" style="display:none;">
+                                <div class="form-container">
+                                    <form id="incomeForm" class="modern-form">
+                                        <div class="form-group">
+                                            <label for="incomeAmount" class="form-label">Amount</label>
+                                            <div class="amount-container">
+                                                <div class="currency-symbol">₹</div>
+                                                <input type="number" id="incomeAmount" name="amount" class="form-input amount-input" step="0.01" min="0" placeholder="0.00" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="incomeSource" class="form-label">Source</label>
+                                            <input type="text" id="incomeSource" name="source" class="form-input" placeholder="Salary, Freelance..." required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="incomeDate" class="form-label">Date</label>
+                                            <input type="date" id="incomeDate" name="date" class="form-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="incomeDescription" class="form-label">Description (Optional)</label>
+                                            <input type="text" id="incomeDescription" name="description" class="form-input" placeholder="Additional details...">
+                                        </div>
+                                        <div class="form-group multi-track-selection">
+                                            <label class="form-label">Also add to other tracks?</label>
+                                            <div id="incomeMultiTracks" class="track-checklist">
+                                                <!-- Populated by JS -->
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="submit-btn">
+                                            <div class="btn-content">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                <span>Add Income</span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="incomeList" class="items-list">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- Edit Modal (for income/expense editing) -->
+            <div id="editModal" class="modal">
+                <div class="modal-backdrop"></div>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h3 id="modalTitle" class="modal-title">Edit Item</h3>
+                        <button class="modal-close" id="closeModal">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editForm" class="modern-form">
+                            <input type="hidden" id="editItemId">
+                            <input type="hidden" id="editItemType">
+
+                            <!-- Expense Fields -->
+                            <div id="editExpenseFields" class="form-fields" style="display: none;">
+                                <div class="form-group">
+                                    <label for="editExpenseAmount" class="form-label">Amount</label>
+                                    <div class="amount-container">
+                                        <div class="currency-symbol">₹</div>
+                                        <input type="number" id="editExpenseAmount" class="form-input amount-input" step="0.01" min="0">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editExpenseCategory" class="form-label">Category</label>
+                                    <div class="select-container">
+                                        <select id="editExpenseCategory" class="form-select">
+                                            <option value="">Select Category</option>
+                                            <option value="food">🍔 Food & Dining</option>
+                                            <option value="transportation">🚗 Transportation</option>
+                                            <option value="shopping">🛍️ Shopping</option>
+                                            <option value="entertainment">🎬 Entertainment</option>
+                                            <option value="utilities">⚡ Utilities</option>
+                                            <option value="healthcare">🏥 Healthcare</option>
+                                            <option value="education">📚 Education</option>
+                                            <option value="travel">✈️ Travel</option>
+                                            <option value="lend">💸 Lend</option>
+                                            <option value="other">📦 Other</option>
+                                        </select>
+                                        <div class="select-arrow">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editExpenseDate" class="form-label">Date</label>
+                                    <input type="date" id="editExpenseDate" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editExpenseDescription" class="form-label">Description</label>
+                                    <input type="text" id="editExpenseDescription" class="form-input">
+                                </div>
+                            </div>
+
+                            <!-- Income Fields -->
+                            <div id="editIncomeFields" class="form-fields" style="display: none;">
+                                <div class="form-group">
+                                    <label for="editIncomeAmount" class="form-label">Amount</label>
+                                    <div class="amount-container">
+                                        <div class="currency-symbol">₹</div>
+                                        <input type="number" id="editIncomeAmount" class="form-input amount-input" step="0.01" min="0">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editIncomeSource" class="form-label">Source</label>
+                                    <input type="text" id="editIncomeSource" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editIncomeDate" class="form-label">Date</label>
+                                    <input type="date" id="editIncomeDate" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editIncomeDescription" class="form-label">Description</label>
+                                    <input type="text" id="editIncomeDescription" class="form-input">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="cancel-btn" id="cancelEdit">Cancel</button>
+                        <button type="submit" form="editForm" class="update-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span>Update</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Track Modal -->
+            <div id="editTrackModal" class="modal">
+                <div class="modal-backdrop"></div>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Edit Track</h3>
+                        <button class="modal-close" id="closeTrackModal">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editTrackForm" class="modern-form">
+                            <div class="form-group">
+                                <label for="editTrackName" class="form-label">Track Name</label>
+                                <input type="text" id="editTrackName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editTrackBudget" class="form-label">Budget Limit (₹)</label>
+                                <input type="number" id="editTrackBudget" class="form-input" min="0" step="0.01">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="cancel-btn" id="cancelTrackEdit">Cancel</button>
+                        <button type="submit" form="editTrackForm" class="update-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loading" class="loading-overlay" style="display: none;">
+                <div class="loading-container">
+                    <div class="loading-spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <div class="loading-text">Processing...</div>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div id="errorMessage" class="notification error-notification" style="display: none;">
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                            <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="notification-body"><p id="errorText"></p></div>
+                </div>
+                <button class="notification-close">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+
+            <div id="successMessage" class="notification success-notification" style="display: none;">
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2" />
+                            <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="notification-body"><p id="successText"></p></div>
+                </div>
+                <button class="notification-close">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+            const firebaseConfig = {
+                apiKey: "AIzaSyDOdCjRAGkb9ssZShSiIU2DxfATAVZ-gKc",
+                authDomain: "budget-tracker-f8a91.firebaseapp.com",
+                projectId: "budget-tracker-f8a91",
+                storageBucket: "budget-tracker-f8a91.firebasestorage.app",
+                messagingSenderId: "665903277149",
+                appId: "1:665903277149:web:807aa9a3487d0308d859b4",
+                measurementId: "G-25RK8CP42T"
+            };
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+        </script>
+</body>
+</html>
