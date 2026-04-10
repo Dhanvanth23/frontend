@@ -843,3 +843,6 @@ function escapeHtml(unsafe) {
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
 }
+fetch("https://your-app.up.railway.app/api")
+  .then(res => res.json())
+  .then(data => console.log(data));
