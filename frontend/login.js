@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Translation Functions
 async function loadTranslations(lang) {
     try {
-        const response = await fetch(`/api/translations/${lang}`);
+        const response = await fetch(`https://backend-production.up.railway.app/api/translations/${lang}`);
         translations = await response.json();
         currentLanguage = lang;
         localStorage.setItem('language', lang);
@@ -167,7 +167,7 @@ function setupLoginForm() {
         
         console.log('Attempting login for:', usernameValue);
         
-        fetch('/api/auth/login', {
+        fetch('https://backend-production.up.railway.app/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -302,7 +302,7 @@ function setupRegisterForm() {
         
         console.log('Attempting registration for:', usernameValue, emailValue);
         
-        fetch('/api/auth/register', {
+        fetch('https://backend-production.up.railway.app/api/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

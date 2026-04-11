@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════
 
 const CONFIG = {
-    API_BASE_URL: window.location.origin + '/api',
+    API_BASE_URL: 'https://backend-production.up.railway.app/api',
     NOTIFICATIONS_DURATION: 4000,
     LOADING_MIN_DURATION: 300,
 };
@@ -48,7 +48,7 @@ function checkAuthentication() {
     const loadingScreen = document.getElementById('loadingScreen');
     if (loadingScreen) loadingScreen.style.display = 'flex';
 
-    fetch('/api/auth/me', { method: 'GET', credentials: 'include' })
+    fetch('https://backend-production.up.railway.app/api/auth/me', { method: 'GET', credentials: 'include' })
         .then(r => { if (!r.ok) { window.location.href = '/login'; throw new Error('Not authenticated'); } return r.json(); })
         .then(userData => {
             if (loadingScreen) loadingScreen.style.display = 'none';
@@ -179,7 +179,7 @@ function setupEventListeners() {
 
 async function loadTranslations(lang) {
     try {
-        const response = await fetch(`/api/translations/${lang}`);
+        const response = await fetch(`https://backend-production.up.railway.app/api/translations/${lang}`);
         translations = await response.json();
         currentLanguage = lang;
         localStorage.setItem('language', lang);
@@ -790,7 +790,7 @@ function createListItem(item, type) {
 
 async function handleLogout() {
     try {
-        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        await fetch('https://backend-production.up.railway.app/api/auth/logout', { method: 'POST', credentials: 'include' });
     } catch (e) { /* ignore */ }
     window.location.href = '/login';
 }
