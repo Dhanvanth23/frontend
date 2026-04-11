@@ -389,3 +389,6 @@ function clearMessages() {
         el.style.display = 'none';
     });
 }
+fetch("https://backend-production.up.railway.app/api")
+  .then(res => res.json())
+  .then(data => console.log(data));
